@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gazeless: The Blinder</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --panel-bg: #141414;
+            --border-color: #262626;
+            --text-main: #d4d4d8;
+            --text-muted: #71717a;
+            --crimson: #ef4444;
+            --sky-blue: #0ea5e9;
+            --hollow-white: #fafafa;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        .quote {
+            font-style: italic;
+            color: var(--text-muted);
+            margin: 20px 0;
+            font-size: 1.1rem;
+            text-align: center;
+            border-left: 2px solid var(--border-color);
+            border-right: 2px solid var(--border-color);
+            padding: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background-color: #000000;
+            padding: 6px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .tab-btn.active {
+            background-color: var(--panel-bg);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .content-panel {
+            display: none;
+            background-color: var(--panel-bg);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .content-panel.active {
+            display: block;
+        }
+
+        .gaze-section, .messenger-section, .route-section {
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .gaze-section:last-child, .messenger-section:last-child, .route-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        .crimson-heading { color: var(--crimson); }
+        .blue-heading { color: var(--sky-blue); }
+        .hollow-heading { color: var(--hollow-white); }
+
+        p {
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        .highlight-box {
+            background-color: rgba(255,255,255,0.02);
+            border-left: 4px solid var(--border-color);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 15px;
+        }
+
+        .highlight-box.crimson-border { border-left-color: var(--crimson); background-color: rgba(239,68,68,0.02); }
+        .highlight-box.blue-border { border-left-color: var(--sky-blue); background-color: rgba(14,165,233,0.02); }
+        .highlight-box.hollow-border { border-left-color: var(--hollow-white); background-color: rgba(250,250,250,0.02); }
+
+        ul {
+            list-style-type: none;
+            margin-top: 10px;
+        }
+
+        li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .crimson-list li::before { color: var(--crimson); }
+        .blue-list li::before { color: var(--sky-blue); }
+
+        strong {
+            color: #ffffff;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 5px;
+            padding: 20px 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 class="title">Gazeless</h1>
+        <div class="subtitle">The Blinder</div>
+        <div class="quote">"Arise, Unaligned One. The cosmos watches. Walk the shifting earth, survive the heavy skies, and claim your destiny as The Gaze-Weaver... or blind the universe forever."</div>
+    </header>
+
+    <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchPanel('gazes')">The Gazes</button>
+        <button class="tab-btn" onclick="switchPanel('messengers')">Messengers</button>
+        <button class="tab-btn" onclick="switchPanel('endings')">End Routes</button>
+    </nav>
+
+    <!-- PANEL 1: GAZES -->
+    <div id="gazes" class="content-panel active">
+        <div class="gaze-section">
+            <h2 class="crimson-heading">🔴 The Crimson Gaze</h2>
+            <p><strong>The Age of the Flayed Horizon:</strong> A blood-red sun eye locks at the zenith of the heavens. It tears away all comforting veils, exposing the raw, rotting flesh of existence. Humanity is driven mad by the feeling of being constantly watched, judged, and stripped bare.</p>
+            <div class="highlight-box crimson-border">
+                <strong>Gameplay Shift:</strong> Passive stamina regeneration is completely disabled. You must land hyper-precise strikes on exposed structural weaknesses to recover energy. Lethality is heavily amplified for both you and your enemies.
+            </div>
+        </div>
+
+        <div class="gaze-section">
+            <h2 class="blue-heading">🙈 The Averting Gaze</h2>
+            <p><strong>The Age of the Blind Zenith:</strong> A magnificent cosmic presence hides within an eerily perfect, flawless clear sky-blue atmosphere, turning its face completely away from the earth. It bathes the world below in a permanent, blindingly bright noon to veil the ongoing decay.</p>
+            <div class="highlight-box blue-border">
+                <strong>Gameplay Shift:</strong> Pristine structures are deceptive illusions. Monsters appear as elegant knights or majestic courtiers, but their hitboxes conform to their true, invisible monstrous shapes. Survival relies on audio cues and strict rhythmic memory.
+            </div>
+        </div>
+
+        <div class="gaze-section">
+            <h2 class="hollow-heading">🌑 The Hollow Gaze</h2>
+            <p><strong>The Age of the Ashen Canvas:</strong> A perfect, absolute vacuum in the universe that leaks total cosmic apathy, draining all elements, status effects, and color from the world. It serves as the raw, neutral canvas of reality.</p>
+            <div class="highlight-box hollow-border">
+                <strong>Gameplay Shift:</strong> Focuses entirely on weight, momentum, and poise. Combat behaves like a heavy, rhythmic dance of kinetic force. Glitched, monochrome architecture and environmental fragments from the other two gazes bleed into the plain.
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL 2: MESSENGERS -->
+    <div id="messengers" class="content-panel">
+        <div class="messenger-section">
+            <h2 class="crimson-heading">🐛 The Flayed Scholar (Crimson)</h2>
+            <p>Once a grand imperial scholar obsessed with uncovering raw reality, the crushing weight of the Crimson Gaze melted their humanity entirely. Now, they exist as a pure, massive centipede creature with armored plates and scythe-like legs.</p>
+            <p><em>Interaction:</em> They uncoil from the checkpoint shadows and constrict your character, piercing your flesh to channel levels and raw strength through absolute physical agony.</p>
+        </div>
+
+        <div class="messenger-section">
+            <h2 class="blue-heading">🪷 The Nun of the Blue Lily (Averting)</h2>
+            <p>A mortal high priestess who wept blood until her eyes bled to escape the trauma of the cosmic wars. The Averting Gaze plucked her eyes and replaced them with blooming blue spider lilies, offering her absolute, blissful amnesia.</p>
+            <p><em>Interaction:</em> She sits serenely by the checkpoint flame under her white veil. Her warm, numbing touch wipes away fatigue, feeding you a seductive, peaceful anesthesia.</p>
+        </div>
+
+        <div class="messenger-section">
+            <h2 class="hollow-heading">🧵 The Stitched Devotee (Hollow)</h2>
+            <p>An artificial vessel stitched together from fallen heroes, left discarded and empty when her mind shattered looking into the void. She features a slit mouth with sharp teeth, secondary mouths on her palms, and joints bound by heavy gray twine that tear open to extend her flesh.</p>
+            <p><em>Interaction:</em> Since you are both unaligned outcasts belonging to no sky, she holds an intense, fanatical adoration for you. You are the only thing in her meaningless universe that matters.</p>
+        </div>
+    </div>
+
+    <!-- PANEL 3: END ROUTES -->
+    <div id="endings" class="content-panel">
+        <div class="route-section">
+            <h2 class="crimson-heading">🔴 Crimson Gaze Branches</h2>
+            <ul class="crimson-list">
+                <li><strong>The Flayed Tyrant:</strong> Enforce total submission to the red sun. All comfort and secrets are vaporized forever; humanity decays out in the open under an unblinking cosmic eye.</li>
+                <li><strong>The Fractured Lens:</strong> You shatter the Sovereign Eye into millions of tiny crystalline shards that fall into the flesh of every living mortal. Secrets become impossible, resulting in pure decentralized anarchy.</li>
+                <li><strong>The Martyr's Veil:</strong> You use your unaligned willpower to filter the red sun through your own body, absorbing the agonizing sting to give humanity a soft burgundy sky and shadow to rebuild.</li>
+            </ul>
+        </div>
+
+        <div class="route-section">
+            <h2 class="blue-heading">🙈 Averting Gaze Branches</h2>
+            <ul class="blue-list">
+                <li><strong>Golden Anesthesia:</strong> Lock the clear-blue sky illusion permanently. Humanity lives in absolute, brainwashed bliss within pristine marble palaces while their real physical bodies rot away to ash.</li>
+                <li><strong>The Cracking Mirror:</strong> You force the god to look at the earth for a split second, causing the sky to fracture with glowing cosmic cracks. The illusion remains but violently glitches, momentarily exposing horrors.</li>
+                <li><strong>The Inherited Dream:</strong> You slay the deity, climb onto the vacant celestial throne, and become the new architect of perception—weaving a tailor-made paradise to rewrite your past losses.</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 Gazeless: The Blinder Dashboard • Built for the Unaligned One</p>
+    </footer>
+
+    <script>
+        function switchPanel(panelId) {
+            // Hide all panels
+            document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Show selected panel and activate button
+            document.getElementById(panelId).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gazeless: The Blinder Database</title>
+    <!-- Include Supabase CDN for automatic live syncing -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        :root { 
+            --bg-dark: #121212; 
+            --panel-bg: #1e1e1e; 
+            --text-main: #e0e0e0; 
+            --crimson: #b30000; 
+            --sky-blue: #4da6ff; 
+            --hollow-gray: #777777; 
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 15px; 
+            padding-bottom: 60px;
+        }
+        .header { 
+            text-align: center; 
+            border-bottom: 2px solid var(--panel-bg); 
+            padding-bottom: 15px; 
+            margin-bottom: 20px; 
+        }
+        .title { font-size: 24px; font-weight: bold; letter-spacing: 2px; }
+        .subtitle { font-size: 12px; color: var(--hollow-gray); letter-spacing: 4px; text-transform: uppercase; margin-top: 5px; }
+        
+        .tabs { display: flex; gap: 5px; margin-bottom: 15px; background: #000; padding: 5px; border-radius: 8px; overflow-x: auto; }
+        .tab { flex: 1; min-width: 80px; text-align: center; padding: 10px 5px; font-size: 11px; font-weight: bold; border-radius: 6px; cursor: pointer; border: none; background: transparent; color: var(--hollow-gray); white-space: nowrap; }
+        .tab.active { background: var(--panel-bg); color: #fff; }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .card { 
+            background: var(--panel-bg); 
+            border-radius: 12px; 
+            padding: 18px; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+        }
+        h3 { margin: 0 0 10px 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        p { margin: 0; font-size: 14px; line-height: 1.5; color: #b0b0b0; }
+        
+        .crimson { color: var(--crimson); }
+        .blue { color: var(--sky-blue); }
+        .hollow { color: #ffffff; }
+
+        ul { padding-left: 20px; margin: 10px 0 0 0; }
+        li { margin-bottom: 8px; font-size: 14px; color: #b0b0b0; line-height: 1.4; }
+        
+        /* Sync Status indicator styling */
+        .sync-banner { background: #111; border: 1px solid #333; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 12px; text-align: center; color: var(--hollow-gray); }
+        .sync-success { color: #00ff00 !important; border-color: #00ff00 !important; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="title">GAZELESS</div>
+        <div class="subtitle">The Blinder Live Archive</div>
+    </div>
+
+    <div id="syncBanner" class="sync-banner">🔄 Connecting to local cosmic timeline...</div>
+
+    <div class="tabs">
+        <button id="tab-gazes" class="tab active" onclick="switchTab('gazes')">THE GAZES</button>
+        <button id="tab-messengers" class="tab" onclick="switchTab('messengers')">MESSENGERS</button>
+        <button id="tab-endings" class="tab" onclick="switchTab('endings')">END ROUTES</button>
+    </div>
+
+    <!-- SECTIONS DIRECTLY MANAGED BY THE CLOUD LIVE-SYNC -->
+    <div id="panel-gazes" class="panel active"></div>
+    <div id="panel-messengers" class="panel"></div>
+    <div id="panel-endings" class="panel"></div>
+
+    <script>
+        // 🛠️ CONFIGURATION STEP: ENTER YOUR PROJECT KEYS HERE BELOW
+        const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+        
+        let supabaseClient = null;
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('panel-' + tabId).classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        async function initializeSync() {
+            if (SUPABASE_URL.startsWith("YOUR_")) {
+                document.getElementById('syncBanner').innerHTML = "🛑 Connection offline. Please add your Supabase credentials to line 61.";
+                loadOfflineFallback();
+                return;
+            }
+
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            document.getElementById('syncBanner').innerHTML = "✨ Connected Live to Chat Workspace.";
+            document.getElementById('syncBanner').classList.add('sync-success');
+
+            // Fetch live entries from database
+            const { data, error } = await supabaseClient.from('lore_entries').select('*').order('created_at', { ascending: true });
+            
+            if (error || !data || data.length === 0) {
+                loadOfflineFallback();
+                return;
+            }
+
+            renderData(data);
+        }
+
+        function renderData(entries) {
+            // Reset contents
+            document.getElementById('panel-gazes').innerHTML = '';
+            document.getElementById('panel-messengers').innerHTML = '';
+            document.getElementById('panel-endings').innerHTML = '';
+
+            entries.forEach(entry => {
+                const targetPanel = document.getElementById('panel-' + entry.tab_type);
+                if (!targetPanel) return;
+
+                const colorClass = entry.alignment === 'crimson' ? 'crimson' : (entry.alignment === 'blue' ? 'blue' : 'hollow');
+                
+                let contentHtml = `<div class="card"><h3 class="${colorClass}">${entry.title}</h3>`;
+                
+                if (entry.is_list) {
+                    contentHtml += `<ul>${entry.description.split('|').map(li => `<li>${li}</li>`).join('')}</ul>`;
+                } else {
+                    contentHtml += `<p>${entry.description}</p>`;
+                }
+                
+                contentHtml += `</div>`;
+                targetPanel.innerHTML += contentHtml;
+            });
+        }
+
+        function loadOfflineFallback() {
+            const fallback = [
+                { tab_type: "gazes", alignment: "crimson", title: "🔴 The Crimson Gaze", description: "The Age of the Flayed Horizon: A blood-red sun eye locks at the zenith. Passive stamina regeneration is completely disabled — you must strike exposed physical weaknesses on enemies to recover your energy.", is_list: false },
+                { tab_type: "gazes", alignment: "blue", title: "🙈 The Averting Gaze", description: "The Age of the Blind Zenith: An eerie, permanent clear sky-blue noon. The world looks gorgeous and pristine, but structures are entirely illusory.", is_list: false },
+                { tab_type: "gazes", alignment: "hollow", title: "🌑 The Hollow Gaze", description: "The Age of the Ashen Canvas: A perfect black hole void that sucks away all color and elemental magic. Gameplay relies completely on physical weight, inertia, and poise.", is_list: false }
+            ];
+            renderData(fallback);
+        }
+
+        window.onload = initializeSync;
+    </script>
+</body>
+</html>
